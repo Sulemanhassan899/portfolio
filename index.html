@@ -82,7 +82,6 @@ body::before {
   transition: all 0.15s ease-out;
 }
 
-
 /* ============================================================
    LOADING SCREEN
 ============================================================ */
@@ -694,6 +693,7 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
   border-radius: 6px;
   overflow: hidden;
   position: relative;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
 }
 .skill-bar-fill {
   height: 100%;
@@ -702,19 +702,63 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
   transition: width 1.2s cubic-bezier(.4,0,.2,1);
   position: relative;
   overflow: hidden;
+  background-size: 220% 100%;
+  box-shadow: 0 0 10px rgba(79,70,229,0.25);
 }
+.skill-bar-fill::before,
 .skill-bar-fill::after {
   content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  transform: translateX(-100%);
+  position: absolute;
+  top: 0;
+  height: 100%;
+  pointer-events: none;
+}
+.skill-bar-fill::before {
+  left: -28%;
+  width: 28%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.88), transparent);
+  opacity: 0;
+  transform: translateX(0);
+}
+.skill-bar-fill::after {
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+  transform: translateX(-120%);
   animation: none;
 }
+.skill-bar-fill.animating {
+  animation: skillBarFlow 0.95s linear infinite, skillBarPulse 0.9s ease-in-out infinite;
+}
+.skill-bar-fill.animating::before {
+  opacity: 1;
+  animation: skillBarHead 0.9s ease-in-out infinite;
+}
+.skill-bar-fill.animating::after {
+  animation: skillBarShimmer 1.1s ease-in-out infinite;
+}
 .skill-bar-fill.animated::after {
-  animation: sweepShimmer 1.5s 1.2s ease forwards;
+  animation: sweepShimmer 1.2s ease forwards;
 }
 @keyframes sweepShimmer {
-  to { transform: translateX(200%); }
+  to { transform: translateX(240%); }
+}
+@keyframes skillBarFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 220% 50%; }
+}
+@keyframes skillBarShimmer {
+  0% { transform: translateX(-120%); opacity: 0.35; }
+  35% { opacity: 1; }
+  100% { transform: translateX(180%); opacity: 0.2; }
+}
+@keyframes skillBarHead {
+  0% { left: -28%; opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { left: 105%; opacity: 0.2; }
+}
+@keyframes skillBarPulse {
+  0%,100% { filter: brightness(1); }
+  50% { filter: brightness(1.2); }
 }
 .skill-bar-fill.c1 { background: linear-gradient(90deg, var(--indigo), var(--cyan)); }
 .skill-bar-fill.c2 { background: linear-gradient(90deg, var(--pink), var(--amber)); }
@@ -2193,8 +2237,12 @@ const barObs = new IntersectionObserver((entries) => {
     if (e.isIntersecting) {
       const bar = e.target;
       const pct = bar.getAttribute('data-pct');
+      bar.classList.add('animating');
       bar.style.width = pct + '%';
-      setTimeout(() => bar.classList.add('animated'), 100);
+      setTimeout(() => {
+        bar.classList.remove('animating');
+        bar.classList.add('animated');
+      }, 1200);
       barObs.unobserve(bar);
     }
   });
