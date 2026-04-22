@@ -329,6 +329,8 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
   display: flex; align-items: center; justify-content: center;
   width: 320px; height: 380px;
 }
+.hero-card-wrap:hover .spinning-ring { animation-duration: 6s; border-color: rgba(6,182,212,0.5); }
+.hero-card-wrap:hover .spinning-ring-inner { animation-duration: 4.5s; border-color: rgba(236,72,153,0.4); }
 .hero-card-wrap::before {
   content: '';
   position: absolute;
@@ -385,6 +387,21 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
   transition: transform 0.25s ease, box-shadow 0.35s ease, border-color 0.35s ease;
   box-shadow: 0 22px 65px rgba(79,70,229,0.22), 0 0 40px rgba(6,182,212,0.12), inset 0 1px 0 rgba(255,255,255,0.2);
 }
+.hero-card-spotlight {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.05) 35%, transparent 70%);
+  transform: translate(-50%, -50%);
+  left: 50%;
+  top: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  mix-blend-mode: screen;
+  z-index: 3;
+}
 .hero-3d-card::before {
   content: '';
   position: absolute;
@@ -406,6 +423,9 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
 .hero-3d-card:hover {
   border-color: rgba(6,182,212,0.4);
   box-shadow: 0 34px 80px rgba(79,70,229,0.25), 0 0 48px rgba(236,72,153,0.22);
+}
+.hero-card-wrap:hover .hero-card-spotlight {
+  opacity: 1;
 }
 .hero-3d-card:hover::before {
   transform: translateX(130%);
@@ -449,22 +469,34 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
   font-weight: 800;
   color: #fff;
   box-shadow: 0 0 30px rgba(79,70,229,0.5);
+  position: relative;
+  z-index: 4;
+  transition: transform 0.25s ease;
+  animation: avatarBreath 3.2s ease-in-out infinite;
 }
 .card-name {
   font-family: var(--font-h);
   font-size: 1rem;
   font-weight: 700;
   margin-bottom: 0.25rem;
+  position: relative;
+  z-index: 4;
+  transition: transform 0.25s ease;
 }
 .card-role {
   font-size: 0.75rem;
   color: var(--cyan);
   margin-bottom: 1.25rem;
   font-weight: 500;
+  position: relative;
+  z-index: 4;
+  transition: transform 0.25s ease;
 }
 .card-stats {
   display: grid; grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
+  position: relative;
+  z-index: 4;
 }
 .stat-item {
   text-align: center;
@@ -472,12 +504,14 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px;
   padding: 0.45rem 0.25rem;
-  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+  transition: transform 0.2s ease, border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  will-change: transform;
 }
 .stat-item:hover {
   transform: translateY(-3px);
   border-color: rgba(6,182,212,0.38);
   background: rgba(6,182,212,0.08);
+  box-shadow: 0 10px 18px rgba(6,182,212,0.18);
 }
 .stat-num {
   font-family: var(--font-h);
@@ -523,6 +557,10 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
 @keyframes haloPulse {
   0%, 100% { transform: scale(0.95); opacity: 0.65; }
   50% { transform: scale(1.08); opacity: 0.95; }
+}
+@keyframes avatarBreath {
+  0%,100% { transform: translateY(0) scale(1); box-shadow: 0 0 30px rgba(79,70,229,0.5); }
+  50% { transform: translateY(-3px) scale(1.03); box-shadow: 0 0 40px rgba(236,72,153,0.45); }
 }
 @keyframes orbFloat1 {
   0%,100% { transform: translateY(0) translateX(0); opacity: 0.8; }
@@ -1025,6 +1063,7 @@ I bridge the gap between unrivaled design and clean architecture. Specializing i
       <div class="spinning-ring"></div>
       <div class="spinning-ring-inner"></div>
       <div class="hero-3d-card">
+        <div class="hero-card-spotlight" aria-hidden="true"></div>
         <div class="card-badge"><span class="live-dot"></span>Available for Projects</div>
         <div class="card-avatar">SH</div>
         <div class="card-name">Suleman Hassan</div>
@@ -2094,6 +2133,11 @@ skillBars.forEach(b => barObs.observe(b));
 /* ---------- HERO CARD INTERACTIONS ---------- */
 const heroCardWrap = document.querySelector('.hero-card-wrap');
 const heroCard = document.querySelector('.hero-3d-card');
+const heroSpotlight = document.querySelector('.hero-card-spotlight');
+const heroCardAvatar = document.querySelector('.card-avatar');
+const heroCardName = document.querySelector('.card-name');
+const heroCardRole = document.querySelector('.card-role');
+const heroStatItems = document.querySelectorAll('.hero-3d-card .stat-item');
 
 if (heroCardWrap && heroCard) {
   heroCardWrap.addEventListener('mousemove', (e) => {
@@ -2102,13 +2146,46 @@ if (heroCardWrap && heroCard) {
     const py = (e.clientY - rect.top) / rect.height;
     const rotateY = (px - 0.5) * 18;
     const rotateX = (0.5 - py) * 16;
-    heroCard.style.transform = `translateY(-6px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    heroCard.style.transform = `translateY(-7px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+
+    if (heroSpotlight) {
+      heroSpotlight.style.left = `${e.clientX - rect.left}px`;
+      heroSpotlight.style.top = `${e.clientY - rect.top}px`;
+    }
+
+    if (heroCardAvatar) {
+      heroCardAvatar.style.transform = `translate3d(${(px - 0.5) * 12}px, ${(py - 0.5) * 12}px, 20px)`;
+    }
+    if (heroCardName) {
+      heroCardName.style.transform = `translate3d(${(px - 0.5) * 8}px, ${(py - 0.5) * 8}px, 14px)`;
+    }
+    if (heroCardRole) {
+      heroCardRole.style.transform = `translate3d(${(px - 0.5) * 6}px, ${(py - 0.5) * 6}px, 10px)`;
+    }
   });
 
   heroCardWrap.addEventListener('mouseleave', () => {
     heroCard.style.transform = '';
+    if (heroCardAvatar) heroCardAvatar.style.transform = '';
+    if (heroCardName) heroCardName.style.transform = '';
+    if (heroCardRole) heroCardRole.style.transform = '';
+    heroStatItems.forEach((item) => { item.style.transform = ''; });
   });
 }
+
+heroStatItems.forEach((item) => {
+  item.addEventListener('mousemove', (e) => {
+    const rect = item.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    const tx = (x - 0.5) * 8;
+    const ty = (y - 0.5) * 8;
+    item.style.transform = `translate(${tx}px, ${ty - 2}px)`;
+  });
+  item.addEventListener('mouseleave', () => {
+    item.style.transform = '';
+  });
+});
 
 const statNums = document.querySelectorAll('.stat-num[data-count]');
 const statObserver = new IntersectionObserver((entries, observer) => {
