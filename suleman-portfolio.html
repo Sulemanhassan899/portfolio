@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suleman Hassan — Flutter Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CSS VARIABLES & RESET
+============================================================ */
+:root {
+  --indigo:   #4f46e5;
+  --pink:     #ec4899;
+  --cyan:     #06b6d4;
+  --amber:    #f59e0b;
+  --bg:       #05050f;
+  --bg2:      #0a0a1a;
+  --bg3:      #0f0f22;
+  --glass:    rgba(255,255,255,0.04);
+  --glass-b:  rgba(255,255,255,0.08);
+  --text:     #e2e8f0;
+  --muted:    #94a3b8;
+  --border:   rgba(255,255,255,0.08);
+  --font-h:   'Syne', sans-serif;
+  --font-b:   'DM Sans', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-b);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ============================================================
+   SCROLLBAR
+============================================================ */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: linear-gradient(var(--indigo), var(--pink)); border-radius: 4px; }
+
+/* ============================================================
+   NOISE TEXTURE OVERLAY
+============================================================ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.4;
+}
+
+/* ============================================================
+   CUSTOM CURSOR
+============================================================ */
+#cursor-dot {
+  position: fixed; top: 0; left: 0;
+  width: 8px; height: 8px;
+  background: var(--cyan);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 12px var(--cyan), 0 0 24px var(--cyan);
+  transition: transform 0.05s, background 0.2s;
+}
+#cursor-ring {
+  position: fixed; top: 0; left: 0;
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(6,182,212,0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: all 0.15s ease-out;
+}
+
+/* ============================================================
+   LOADING SCREEN
+============================================================ */
+#loader {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 9990;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+#loader.hidden { opacity: 0; visibility: hidden; }
+.loader-initials {
+  font-family: var(--font-h);
+  font-size: clamp(4rem, 10vw, 7rem);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--indigo), var(--pink), var(--cyan), var(--amber));
+  background-size: 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 2s linear infinite;
+  letter-spacing: -2px;
+}
+.loader-bar-wrap {
+  width: 200px; height: 3px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  margin-top: 2rem;
+  overflow: hidden;
+}
+.loader-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--indigo), var(--pink), var(--cyan));
+  border-radius: 10px;
+  animation: loadprogress 2s ease forwards;
+}
+@keyframes loadprogress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+/* ============================================================
+   PARTICLE CANVAS
+============================================================ */
+#particle-canvas {
+  position: fixed; inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ============================================================
+   NAVBAR
+============================================================ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 500;
+  padding: 0 clamp(1.5rem, 5vw, 4rem);
+  height: 70px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(5,5,15,0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transform: translateY(-100%);
+  animation: slideDown 0.6s 2.2s ease forwards;
+}
+@keyframes slideDown { to { transform: translateY(0); } }
+.nav-logo {
+  font-family: var(--font-h);
+  font-weight: 800;
+  font-size: 1.3rem;
+  background: linear-gradient(90deg, var(--cyan), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+}
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a {
+  font-family: var(--font-b);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  position: relative;
+  padding-bottom: 2px;
+  transition: color 0.2s;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0;
+  width: 0; height: 1.5px;
+  background: linear-gradient(90deg, var(--cyan), var(--pink));
+  transition: width 0.3s ease;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a:hover::after { width: 100%; }
+.nav-toggle { display: none; flex-direction: column; gap: 5px; cursor: none; }
+.nav-toggle span { width: 24px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.3s; }
+
+/* ============================================================
+   WRAPPER / SECTIONS
+============================================================ */
+main { position: relative; z-index: 10; }
+section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
+.section-tag {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--font-b); font-size: 0.75rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--cyan); margin-bottom: 1rem;
+}
+.section-tag::before {
+  content: '';
+  width: 20px; height: 1.5px;
+  background: var(--cyan);
+}
+.section-title {
+  font-family: var(--font-h);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+
+/* ============================================================
+   SCROLL REVEAL
+============================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.from-left  { transform: translateX(-50px); }
+.reveal.from-right { transform: translateX(50px); }
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ============================================================
+   SHIMMER ANIMATION
+============================================================ */
+@keyframes shimmer {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* ============================================================
+   HERO SECTION
+============================================================ */
+#hero {
+  min-height: 100vh;
+  display: flex; align-items: center;
+  padding-top: 100px;
+  gap: 4rem;
+}
+.hero-left { flex: 1; }
+.hero-right { flex: 0 0 380px; display: flex; justify-content: center; }
+
+.availability-tag {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: rgba(6,182,212,0.1);
+  border: 1px solid rgba(6,182,212,0.3);
+  border-radius: 100px;
+  padding: 0.4rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--cyan);
+  margin-bottom: 1.5rem;
+}
+.availability-tag .dot {
+  width: 7px; height: 7px;
+  background: var(--cyan);
+  border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { box-shadow: 0 0 0 0 rgba(6,182,212,0.4); }
+  50%      { box-shadow: 0 0 0 6px rgba(6,182,212,0); }
+}
+
+.hero-name {
+  font-family: var(--font-h);
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #fff 0%, var(--cyan) 30%, var(--pink) 60%, var(--amber) 100%);
+  background-size: 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+.hero-subtitle {
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  color: var(--muted);
+  font-weight: 400;
+  margin-bottom: 0.8rem;
+}
+.hero-desc {
+  font-size: 1rem;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 520px;
+  margin-bottom: 2rem;
+}
+.hero-ctas { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.85rem 1.8rem;
+  background: linear-gradient(135deg, var(--indigo), var(--pink));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-b);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: none;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(79,70,229,0.4);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(236,72,153,0.4); }
+
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.85rem 1.8rem;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: var(--font-b);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: none;
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+.btn-secondary:hover { border-color: var(--cyan); background: rgba(6,182,212,0.05); transform: translateY(-2px); }
+
+/* 3D floating card */
+.hero-card-wrap {
+  perspective: 800px;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  width: 320px; height: 380px;
+}
+.hero-glow {
+  position: absolute;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(79,70,229,0.5) 0%, transparent 70%);
+  animation: floatGlow 4s ease-in-out infinite;
+  filter: blur(30px);
+}
+@keyframes floatGlow {
+  0%,100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-20px) scale(1.1); }
+}
+.spinning-ring {
+  position: absolute;
+  width: 280px; height: 280px;
+  border: 2px dashed rgba(6,182,212,0.3);
+  border-radius: 50%;
+  animation: spinRing 12s linear infinite;
+}
+@keyframes spinRing { to { transform: rotate(360deg); } }
+.spinning-ring-inner {
+  position: absolute;
+  width: 240px; height: 240px;
+  border: 1px dashed rgba(236,72,153,0.25);
+  border-radius: 50%;
+  animation: spinRing 8s linear infinite reverse;
+}
+.hero-3d-card {
+  width: 220px;
+  background: linear-gradient(135deg, rgba(79,70,229,0.2), rgba(236,72,153,0.1));
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 24px;
+  padding: 2rem;
+  text-align: center;
+  backdrop-filter: blur(20px);
+  animation: float3d 6s ease-in-out infinite;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 20px 60px rgba(79,70,229,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+@keyframes float3d {
+  0%,100% { transform: translateY(0) rotateY(-5deg) rotateX(3deg); }
+  33%      { transform: translateY(-15px) rotateY(5deg) rotateX(-3deg); }
+  66%      { transform: translateY(-8px) rotateY(0deg) rotateX(5deg); }
+}
+.card-avatar {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--indigo), var(--pink));
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1rem;
+  font-family: var(--font-h);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 0 30px rgba(79,70,229,0.5);
+}
+.card-name {
+  font-family: var(--font-h);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.card-role {
+  font-size: 0.75rem;
+  color: var(--cyan);
+  margin-bottom: 1.25rem;
+  font-weight: 500;
+}
+.card-stats {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+.stat-item { text-align: center; }
+.stat-num {
+  font-family: var(--font-h);
+  font-size: 1.4rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--cyan), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.stat-label { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+
+/* ============================================================
+   MARQUEE
+============================================================ */
+.marquee-section {
+  padding: 2rem clamp(1.5rem, 8vw, 6rem);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--bg2);
+  position: relative; z-index: 10;
+}
+.marquee-track {
+  display: flex; gap: 3rem;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+@keyframes marquee { to { transform: translateX(-50%); } }
+.marquee-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  font-family: var(--font-h); font-size: 0.85rem; font-weight: 600;
+  color: var(--muted); white-space: nowrap;
+  letter-spacing: 0.05em;
+}
+.marquee-item span { color: var(--pink); font-size: 1.1rem; }
+
+/* ============================================================
+   SKILLS SECTION
+============================================================ */
+#skills { background: var(--bg2); }
+.skills-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 3rem;
+}
+.skill-item { margin-bottom: 1.25rem; }
+.skill-info {
+  display: flex; justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+.skill-name { font-size: 0.9rem; font-weight: 500; }
+.skill-pct { font-size: 0.8rem; color: var(--muted); }
+.skill-bar-track {
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.skill-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  width: 0%;
+  transition: width 1.2s cubic-bezier(.4,0,.2,1);
+  position: relative;
+  overflow: hidden;
+}
+.skill-bar-fill::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transform: translateX(-100%);
+  animation: none;
+}
+.skill-bar-fill.animated::after {
+  animation: sweepShimmer 1.5s 1.2s ease forwards;
+}
+@keyframes sweepShimmer {
+  to { transform: translateX(200%); }
+}
+.skill-bar-fill.c1 { background: linear-gradient(90deg, var(--indigo), var(--cyan)); }
+.skill-bar-fill.c2 { background: linear-gradient(90deg, var(--pink), var(--amber)); }
+.skill-bar-fill.c3 { background: linear-gradient(90deg, var(--cyan), var(--indigo)); }
+.skill-bar-fill.c4 { background: linear-gradient(90deg, var(--amber), var(--pink)); }
+
+/* Tech chips */
+.tech-cloud {
+  margin-top: 3rem;
+  display: flex; flex-wrap: wrap; gap: 0.75rem;
+}
+.tech-chip {
+  padding: 0.45rem 1rem;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+  transition: transform 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+.tech-chip:hover {
+  transform: translateY(-4px);
+  color: var(--text);
+  border-color: var(--cyan);
+  box-shadow: 0 4px 20px rgba(6,182,212,0.2);
+}
+
+/* ============================================================
+   EXPERIENCE SECTION
+============================================================ */
+#experience { background: var(--bg); }
+.timeline {
+  position: relative;
+  margin-top: 3rem;
+  padding-left: 2rem;
+}
+.timeline::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--indigo), var(--pink), var(--cyan), transparent);
+  border-radius: 2px;
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 2.5rem;
+}
+.timeline-dot {
+  position: absolute;
+  left: -2.55rem;
+  top: 0.3rem;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--indigo), var(--pink));
+  box-shadow: 0 0 12px rgba(79,70,229,0.6);
+  border: 2px solid var(--bg);
+}
+.exp-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+}
+.exp-card:hover {
+  transform: translateX(8px);
+  border-color: rgba(79,70,229,0.4);
+  box-shadow: 0 8px 40px rgba(79,70,229,0.15);
+}
+.exp-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-wrap: wrap; gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.exp-title {
+  font-family: var(--font-h);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.exp-company {
+  font-size: 0.85rem;
+  color: var(--cyan);
+  font-weight: 500;
+  margin-top: 0.15rem;
+}
+.exp-meta {
+  text-align: right;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.exp-dates { margin-bottom: 0.15rem; }
+.exp-location { display: flex; align-items: center; gap: 0.25rem; justify-content: flex-end; }
+.exp-desc { font-size: 0.9rem; color: var(--muted); line-height: 1.7; margin-bottom: 1rem; }
+.exp-bullets { list-style: none; margin-bottom: 1rem; }
+.exp-bullets li {
+  font-size: 0.875rem;
+  color: var(--muted);
+  padding-left: 1.2rem;
+  position: relative;
+  margin-bottom: 0.4rem;
+  line-height: 1.6;
+}
+.exp-bullets li::before {
+  content: '›';
+  position: absolute; left: 0;
+  color: var(--pink);
+  font-weight: 700;
+}
+.badge-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.badge-chip {
+  padding: 0.25rem 0.7rem;
+  background: rgba(79,70,229,0.15);
+  border: 1px solid rgba(79,70,229,0.3);
+  border-radius: 100px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--indigo);
+  color: #a5b4fc;
+}
+
+/* ============================================================
+   PROJECTS SECTION
+============================================================ */
+#projects { background: var(--bg3); }
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+.project-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 1.75rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.project-card::before {
+  content: '';
+  position: absolute; top: 0; left: -100%; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), var(--pink), var(--amber), transparent);
+  transition: left 0.5s ease;
+}
+.project-card:hover::before { left: 0; }
+.project-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 60px rgba(6,182,212,0.1);
+  border-color: rgba(6,182,212,0.2);
+}
+.proj-emoji { font-size: 2rem; margin-bottom: 1rem; }
+.proj-name {
+  font-family: var(--font-h);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.proj-desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+.proj-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.proj-tag {
+  padding: 0.2rem 0.6rem;
+  background: rgba(6,182,212,0.1);
+  border: 1px solid rgba(6,182,212,0.2);
+  border-radius: 100px;
+  font-size: 0.7rem;
+  color: var(--cyan);
+  font-weight: 500;
+}
+
+/* ============================================================
+   EDUCATION SECTION
+============================================================ */
+#education { background: var(--bg2); }
+.edu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 3rem; }
+.edu-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 1.75rem;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.edu-card:hover { border-color: rgba(245,158,11,0.3); transform: translateY(-4px); }
+.edu-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(236,72,153,0.2));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+.edu-degree { font-family: var(--font-h); font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+.edu-inst { font-size: 0.85rem; color: var(--cyan); margin-bottom: 0.5rem; font-weight: 500; }
+.edu-meta { font-size: 0.8rem; color: var(--muted); display: flex; gap: 1rem; flex-wrap: wrap; }
+
+/* Certifications */
+.certs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 2rem; }
+.cert-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem;
+  transition: border-color 0.3s;
+}
+.cert-card:hover { border-color: rgba(245,158,11,0.3); }
+.cert-name { font-family: var(--font-h); font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; }
+.cert-org { font-size: 0.75rem; color: var(--amber); margin-bottom: 0.3rem; font-weight: 500; }
+.cert-date { font-size: 0.72rem; color: var(--muted); }
+
+/* ============================================================
+   CONTACT SECTION
+============================================================ */
+#contact { background: var(--bg); }
+.contact-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  margin-top: 3rem;
+}
+.contact-cards { display: flex; flex-direction: column; gap: 1rem; }
+.contact-card {
+  display: flex; align-items: center; gap: 1rem;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.25rem;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+  text-decoration: none;
+  color: inherit;
+}
+.contact-card:hover {
+  transform: translateX(8px);
+  border-color: rgba(236,72,153,0.3);
+  box-shadow: 0 4px 20px rgba(236,72,153,0.1);
+}
+.contact-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.contact-icon.email   { background: rgba(79,70,229,0.2); }
+.contact-icon.phone   { background: rgba(6,182,212,0.2); }
+.contact-icon.loc     { background: rgba(245,158,11,0.2); }
+.contact-icon.avail   { background: rgba(236,72,153,0.2); }
+.contact-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.15rem; }
+.contact-value { font-size: 0.9rem; font-weight: 500; }
+
+/* Pulsing avatar */
+.contact-avatar-wrap {
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.ripple-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(236,72,153,0.35);
+  animation: rippleOut 3s ease-out infinite;
+}
+.ripple-ring:nth-child(1) { width: 160px; height: 160px; animation-delay: 0s; }
+.ripple-ring:nth-child(2) { width: 220px; height: 220px; animation-delay: 1s; }
+.ripple-ring:nth-child(3) { width: 280px; height: 280px; animation-delay: 2s; }
+@keyframes rippleOut {
+  0%   { transform: scale(0.9); opacity: 0.7; }
+  100% { transform: scale(1.1); opacity: 0; }
+}
+.contact-big-avatar {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--indigo), var(--pink));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-h);
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #fff;
+  position: relative; z-index: 2;
+  box-shadow: 0 0 40px rgba(79,70,229,0.4);
+  animation: pulse-avatar 3s ease-in-out infinite;
+}
+@keyframes pulse-avatar {
+  0%,100% { box-shadow: 0 0 40px rgba(79,70,229,0.4); }
+  50%      { box-shadow: 0 0 70px rgba(236,72,153,0.5); }
+}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+footer {
+  position: relative; z-index: 10;
+  text-align: center;
+  padding: 2rem clamp(1.5rem, 8vw, 6rem);
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: var(--bg);
+}
+footer span {
+  background: linear-gradient(90deg, var(--cyan), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 900px) {
+  #hero { flex-direction: column; text-align: center; align-items: center; }
+  .hero-right { flex: none; }
+  .hero-ctas { justify-content: center; }
+  .hero-desc { margin-left: auto; margin-right: auto; }
+  .skills-grid { grid-template-columns: 1fr; }
+  .projects-grid { grid-template-columns: 1fr 1fr; }
+  .edu-grid { grid-template-columns: 1fr; }
+  .certs-grid { grid-template-columns: 1fr; }
+  .contact-wrap { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .projects-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .nav-toggle { display: flex; }
+  nav { height: 60px; }
+  .hero-card-wrap { width: 260px; height: 300px; }
+  .hero-3d-card { width: 180px; }
+  .nav-links.open {
+    display: flex; flex-direction: column;
+    position: absolute; top: 60px; left: 0; right: 0;
+    background: rgba(5,5,15,0.95);
+    backdrop-filter: blur(20px);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    gap: 1.25rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-initials">SH</div>
+  <div class="loader-bar-wrap">
+    <div class="loader-bar"></div>
+  </div>
+</div>
+
+<!-- PARTICLE CANVAS -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">Suleman Hassan</a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#education">Education</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-toggle" id="navToggle" onclick="toggleNav()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<main>
+
+<!-- ========== HERO ========== -->
+<section id="hero">
+  <div class="hero-left reveal from-left">
+    <div class="availability-tag">
+      <div class="dot"></div>
+      Available for opportunities
+    </div>
+    <h1 class="hero-name">Suleman<br>Hassan</h1>
+    <p class="hero-subtitle">Mid-Level Flutter Developer</p>
+    <p class="hero-desc">Computer Science graduate with 3.5+ years building scalable, high-performance cross-platform mobile apps. 30+ projects delivered end-to-end — from Figma to deployment.</p>
+    <div class="hero-ctas">
+      <a href="#contact" class="btn-primary">✦ Get in Touch</a>
+      <a href="#projects" class="btn-secondary">View Projects →</a>
+    </div>
+  </div>
+
+  <div class="hero-right reveal from-right">
+    <div class="hero-card-wrap">
+      <div class="hero-glow"></div>
+      <div class="spinning-ring"></div>
+      <div class="spinning-ring-inner"></div>
+      <div class="hero-3d-card">
+        <div class="card-avatar">SH</div>
+        <div class="card-name">Suleman Hassan</div>
+        <div class="card-role">Flutter Developer</div>
+        <div class="card-stats">
+          <div class="stat-item">
+            <div class="stat-num">3.5+</div>
+            <div class="stat-label">Years Exp</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">30+</div>
+            <div class="stat-label">Projects</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">4</div>
+            <div class="stat-label">Certs</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">PKT</div>
+            <div class="stat-label">Islamabad</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== MARQUEE ========== -->
+<div class="marquee-section">
+  <div class="marquee-track" id="marqueeTrack">
+    <div class="marquee-item"><span>⬡</span> Descua Software</div>
+    <div class="marquee-item"><span>⬡</span> EcodeCamp</div>
+    <div class="marquee-item"><span>⬡</span> FreeLancing</div>
+    <div class="marquee-item"><span>⬡</span> Flutter</div>
+    <div class="marquee-item"><span>⬡</span> Firebase</div>
+    <div class="marquee-item"><span>⬡</span> Supabase</div>
+    <div class="marquee-item"><span>⬡</span> GetX</div>
+    <div class="marquee-item"><span>⬡</span> Figma</div>
+    <div class="marquee-item"><span>⬡</span> GitHub</div>
+    <div class="marquee-item"><span>⬡</span> REST API</div>
+    <div class="marquee-item"><span>⬡</span> Dart</div>
+    <div class="marquee-item"><span>⬡</span> Android Studio</div>
+    <div class="marquee-item"><span>⬡</span> Xcode</div>
+    <div class="marquee-item"><span>⬡</span> Postman</div>
+    <!-- duplicate for seamless loop -->
+    <div class="marquee-item"><span>⬡</span> Descua Software</div>
+    <div class="marquee-item"><span>⬡</span> EcodeCamp</div>
+    <div class="marquee-item"><span>⬡</span> FreeLancing</div>
+    <div class="marquee-item"><span>⬡</span> Flutter</div>
+    <div class="marquee-item"><span>⬡</span> Firebase</div>
+    <div class="marquee-item"><span>⬡</span> Supabase</div>
+    <div class="marquee-item"><span>⬡</span> GetX</div>
+    <div class="marquee-item"><span>⬡</span> Figma</div>
+    <div class="marquee-item"><span>⬡</span> GitHub</div>
+    <div class="marquee-item"><span>⬡</span> REST API</div>
+    <div class="marquee-item"><span>⬡</span> Dart</div>
+    <div class="marquee-item"><span>⬡</span> Android Studio</div>
+    <div class="marquee-item"><span>⬡</span> Xcode</div>
+    <div class="marquee-item"><span>⬡</span> Postman</div>
+  </div>
+</div>
+
+<!-- ========== SKILLS ========== -->
+<section id="skills">
+  <div class="reveal">
+    <div class="section-tag">Expertise</div>
+    <h2 class="section-title">Skills & <br><span style="background:linear-gradient(90deg,var(--cyan),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Technologies</span></h2>
+  </div>
+
+  <div class="skills-grid">
+    <div class="reveal">
+      <div class="skill-item">
+        <div class="skill-info"><span class="skill-name">Flutter / Dart</span><span class="skill-pct">95%</span></div>
+        <div class="skill-bar-track"><div class="skill-bar-fill c1" data-pct="95"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-info"><span class="skill-name">Firebase & Firestore</span><span class="skill-pct">88%</span></div>
+        <div class="skill-bar-track"><div class="skill-bar-fill c2" data-pct="88"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-info"><span class="skill-name">State Management (GetX, BLoC)</span><span class="skill-pct">90%</span></div>
+        <div class="skill-bar-track"><div class="skill-bar-fill c3" data-pct="90"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-info"><span class="skill-name">Supabase</span><span class="skill-pct">82%</span></div>
+        <div class="skill-bar-track"><div class="skill-bar-fill c4" data-pct="82"></div></div>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="skill-item">
+        <div class="skill-info"><span class="skill-name">REST API Integration</span><span class="skill-pct">88%</span></div>
+        <div class="skill-bar-track"><div class="skill-bar-fill c1" data-pct="88"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-info"><span class="skill-name">Figma → Pixel-Perfect UI</span><span class="skill-pct">92%</span></div>
+        <div class="skill-bar-track"><div class="skill-bar-fill c2" data-pct="92"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-info"><span class="skill-name">Java / C#</span><span class="skill-pct">72%</span></div>
+        <div class="skill-bar-track"><div class="skill-bar-fill c3" data-pct="72"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-info"><span class="skill-name">MS SQL / SQLite</span><span class="skill-pct">75%</span></div>
+        <div class="skill-bar-track"><div class="skill-bar-fill c4" data-pct="75"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tech-cloud reveal">
+    <div class="tech-chip">Flutter</div>
+    <div class="tech-chip">Dart</div>
+    <div class="tech-chip">Firebase</div>
+    <div class="tech-chip">Firestore</div>
+    <div class="tech-chip">Supabase</div>
+    <div class="tech-chip">GetX</div>
+    <div class="tech-chip">REST API</div>
+    <div class="tech-chip">Figma</div>
+    <div class="tech-chip">Git</div>
+    <div class="tech-chip">GitHub</div>
+    <div class="tech-chip">Android Studio</div>
+    <div class="tech-chip">Xcode</div>
+    <div class="tech-chip">VS Code</div>
+    <div class="tech-chip">Java</div>
+    <div class="tech-chip">C#</div>
+    <div class="tech-chip">MS SQL Server</div>
+    <div class="tech-chip">SQLite</div>
+    <div class="tech-chip">XML</div>
+    <div class="tech-chip">Postman</div>
+    <div class="tech-chip">Google Console</div>
+    <div class="tech-chip">Test Flight</div>
+    <div class="tech-chip">Agile / Scrum</div>
+    <div class="tech-chip">Localization</div>
+    <div class="tech-chip">Google Ads</div>
+    <div class="tech-chip">Cursor AI</div>
+    <div class="tech-chip">Loveable AI</div>
+  </div>
+</section>
+
+<!-- ========== EXPERIENCE ========== -->
+<section id="experience">
+  <div class="reveal">
+    <div class="section-tag">Career</div>
+    <h2 class="section-title">Work <span style="background:linear-gradient(90deg,var(--pink),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Experience</span></h2>
+  </div>
+
+  <div class="timeline">
+
+    <div class="timeline-item reveal">
+      <div class="timeline-dot"></div>
+      <div class="exp-card">
+        <div class="exp-header">
+          <div>
+            <div class="exp-title">Mid-Level Flutter Developer</div>
+            <div class="exp-company">Freelance</div>
+          </div>
+          <div class="exp-meta">
+            <div class="exp-dates">Jan 2023 – Present</div>
+            <div class="exp-location">📍 Islamabad, PK</div>
+          </div>
+        </div>
+        <ul class="exp-bullets">
+          <li>Currently working as a Mid-level Flutter Developer handling full development lifecycle</li>
+          <li>Handling requirement analysis, UI implementation, state management, custom widget creation</li>
+          <li>Testing and deployment support for 30+ mobile application projects</li>
+        </ul>
+        <div class="badge-chips">
+          <span class="badge-chip">Flutter</span>
+          <span class="badge-chip">Dart</span>
+          <span class="badge-chip">Full Lifecycle</span>
+          <span class="badge-chip">30+ Projects</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-dot"></div>
+      <div class="exp-card">
+        <div class="exp-header">
+          <div>
+            <div class="exp-title">Flutter Developer</div>
+            <div class="exp-company">Descua Software</div>
+          </div>
+          <div class="exp-meta">
+            <div class="exp-dates">Aug 2024 – Aug 2025</div>
+            <div class="exp-location">📍 Rawalpindi, PK</div>
+          </div>
+        </div>
+        <ul class="exp-bullets">
+          <li>Developed mobile applications using Flutter at a software development company</li>
+          <li>Utilized best practices for mobile architecture and performance tuning</li>
+        </ul>
+        <div class="badge-chips">
+          <span class="badge-chip">Flutter</span>
+          <span class="badge-chip">Architecture</span>
+          <span class="badge-chip">Performance</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-dot"></div>
+      <div class="exp-card">
+        <div class="exp-header">
+          <div>
+            <div class="exp-title">Flutter Intern</div>
+            <div class="exp-company">EcodeCamp</div>
+          </div>
+          <div class="exp-meta">
+            <div class="exp-dates">May 2023 – Aug 2023</div>
+            <div class="exp-location">📍 Rawalpindi, PK</div>
+          </div>
+        </div>
+        <ul class="exp-bullets">
+          <li>Completed an internship focused on Flutter development</li>
+          <li>Participated in the development of mobile applications</li>
+        </ul>
+        <div class="badge-chips">
+          <span class="badge-chip">Flutter</span>
+          <span class="badge-chip">Mobile Apps</span>
+          <span class="badge-chip">Internship</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-item reveal">
+      <div class="timeline-dot"></div>
+      <div class="exp-card">
+        <div class="exp-header">
+          <div>
+            <div class="exp-title">Android App Developer</div>
+            <div class="exp-company">FreeLancing</div>
+          </div>
+          <div class="exp-meta">
+            <div class="exp-dates">May 2022 – Jan 2023</div>
+            <div class="exp-location">📍 Rawalpindi, PK</div>
+          </div>
+        </div>
+        <ul class="exp-bullets">
+          <li>Worked on Android app development as a freelancer</li>
+          <li>Involved in multiple stages of application development</li>
+        </ul>
+        <div class="badge-chips">
+          <span class="badge-chip">Android</span>
+          <span class="badge-chip">Java</span>
+          <span class="badge-chip">Freelance</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ========== PROJECTS ========== -->
+<section id="projects">
+  <div class="reveal">
+    <div class="section-tag">Portfolio</div>
+    <h2 class="section-title">Featured <span style="background:linear-gradient(90deg,var(--cyan),var(--indigo));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Projects</span></h2>
+  </div>
+<!-- 
+  <div class="projects-grid">
+
+    <div class="project-card reveal">
+      <div class="proj-emoji">✅</div>
+      <div class="proj-name">Task Flow</div>
+      <div class="proj-desc">To-do manager app with CRUD operations, seamless UX, and OOP-structured codebase.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">Flutter</span>
+        <span class="proj-tag">Dart</span>
+        <span class="proj-tag">CRUD</span>
+        <span class="proj-tag">OOP</span>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="proj-emoji">📸</div>
+      <div class="proj-name">Snap Link</div>
+      <div class="proj-desc">Photo-sharing app with user auth, password reset, Supabase secure storage, and unique HTTP sharing links.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">Flutter</span>
+        <span class="proj-tag">Supabase</span>
+        <span class="proj-tag">HTTP</span>
+        <span class="proj-tag">Auth</span>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="proj-emoji">🔍</div>
+      <div class="proj-name">Scan Master</div>
+      <div class="proj-desc">Live camera barcode scanning app with real-time integration, intuitive UI, and high-performance optimization.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">Flutter</span>
+        <span class="proj-tag">Camera</span>
+        <span class="proj-tag">Barcode</span>
+        <span class="proj-tag">Performance</span>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="proj-emoji">💸</div>
+      <div class="proj-name">Expense App</div>
+      <div class="proj-desc">Daily spending tracker with secure authentication, Firestore integration, CRUD ops, and reliable data persistence.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">Flutter</span>
+        <span class="proj-tag">Firestore</span>
+        <span class="proj-tag">Firebase Auth</span>
+        <span class="proj-tag">CRUD</span>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="proj-emoji">🔒</div>
+      <div class="proj-name">VPN App</div>
+      <div class="proj-desc">Fast, secure VPN application with one-tap connection, global server access, minimal resource usage, and no hidden charges.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">Flutter</span>
+        <span class="proj-tag">Networking</span>
+        <span class="proj-tag">Security</span>
+        <span class="proj-tag">Android</span>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="proj-emoji">🌿</div>
+      <div class="proj-name">Life Maxxing</div>
+      <div class="proj-desc">Productivity tracker app (My Canna Log / Usage Logger) for personal habit and usage tracking workflows.</div>
+      <div class="proj-tags">
+        <span class="proj-tag">Flutter</span>
+        <span class="proj-tag">Productivity</span>
+        <span class="proj-tag">Tracking</span>
+        <span class="proj-tag">SQLite</span>
+      </div>
+    </div>
+
+  
+  </div> -->
+
+<div class="projects-grid">
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">📌</div>
+    <div class="proj-name">Task Flow</div>
+    <div class="proj-desc">Productivity app with full CRUD operations, clean architecture, and scalable OOP-based structure for task management.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Dart</span>
+      <span class="proj-tag">CRUD</span>
+      <span class="proj-tag">OOP</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">📷🔗</div>
+    <div class="proj-name">SnapLink</div>
+    <div class="proj-desc">Secure photo-sharing platform with authentication, password reset, Supabase storage, and unique link-based sharing system.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Supabase</span>
+      <span class="proj-tag">Auth</span>
+      <span class="proj-tag">Storage</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">📡</div>
+    <div class="proj-name">Scan Master</div>
+    <div class="proj-desc">Real-time barcode scanning application using camera integration with optimized performance and instant data recognition.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Camera</span>
+      <span class="proj-tag">Barcode</span>
+      <span class="proj-tag">Real-time</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">💰📊</div>
+    <div class="proj-name">Expense App</div>
+    <div class="proj-desc">Personal finance tracker with Firebase integration, authentication, and structured expense analytics with persistent storage.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Firebase</span>
+      <span class="proj-tag">Firestore</span>
+      <span class="proj-tag">CRUD</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">🛡️</div>
+    <div class="proj-name">VPN App</div>
+    <div class="proj-desc">Lightweight VPN solution with one-tap connection, global servers, and optimized secure tunneling performance.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Networking</span>
+      <span class="proj-tag">Security</span>
+      <span class="proj-tag">Android</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">🚀📊</div>
+    <div class="proj-name">Life Maxxing</div>
+    <div class="proj-desc">Daily life optimization and habit tracking system inspired by social productivity dashboards with task-based analytics.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Productivity</span>
+      <span class="proj-tag">Tracking</span>
+      <span class="proj-tag">UI/UX</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">🌱</div>
+    <div class="proj-name">My Canna Log</div>
+    <div class="proj-desc">Personal tracking application for controlled usage logging and history management with secure local storage.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">SQLite</span>
+      <span class="proj-tag">Tracking</span>
+      <span class="proj-tag">Privacy</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">🧭🧠</div>
+    <div class="proj-name">Beii App</div>
+    <div class="proj-desc">Decision-making assistant app for planning and structured decision workflows with smart suggestion logic.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Logic</span>
+      <span class="proj-tag">Planning</span>
+      <span class="proj-tag">UX</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">🗣️⚖️</div>
+    <div class="proj-name">True Debate</div>
+    <div class="proj-desc">Interactive debate platform for structured arguments, topic discussions, and community engagement for debate enthusiasts.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Social</span>
+      <span class="proj-tag">Realtime</span>
+      <span class="proj-tag">Community</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">🥗💪</div>
+    <div class="proj-name">My Nutrition</div>
+    <div class="proj-desc">Fitness and diet tracking app with calorie logging, workout tracking, and personalized health insights.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Fitness</span>
+      <span class="proj-tag">Health</span>
+      <span class="proj-tag">Tracking</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">🚗📍</div>
+    <div class="proj-name">FlagPole</div>
+    <div class="proj-desc">Driver assistance-style app concept for structured navigation support and utility-based alerts system.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Navigation</span>
+      <span class="proj-tag">Utility</span>
+      <span class="proj-tag">Mobile</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">💘</div>
+    <div class="proj-name">Scupid</div>
+    <div class="proj-desc">Dating-style matching application with swipe-based interaction and profile-based matching system.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">UI/UX</span>
+      <span class="proj-tag">Matching</span>
+      <span class="proj-tag">Social</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">🥊</div>
+    <div class="proj-name">Combat Connect</div>
+    <div class="proj-desc">Learning platform for combat sports enthusiasts with structured training content and progress tracking.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Education</span>
+      <span class="proj-tag">Fitness</span>
+      <span class="proj-tag">Learning</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">👗✨</div>
+    <div class="proj-name">3D Yume</div>
+    <div class="proj-desc">Fashion and clothing visualization concept app focused on 3D-style presentation and design inspiration workflows.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">UI/UX</span>
+      <span class="proj-tag">Fashion</span>
+      <span class="proj-tag">3D Concept</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">🧾📍</div>
+    <div class="proj-name">Service Tracker</div>
+    <div class="proj-desc">Service management system for tracking requests, statuses, and workflow progress across multiple tasks for mechanics </div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Tracking</span>
+      <span class="proj-tag">CRUD</span>
+      <span class="proj-tag">System Design</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">🧮💼</div>
+    <div class="proj-name">Tax Partner</div>
+    <div class="proj-desc">Tax calculation and financial planning assistant app designed for simplified tax estimation and record keeping.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Finance</span>
+      <span class="proj-tag">Calculation</span>
+      <span class="proj-tag">Utility</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">📅</div>
+    <div class="proj-name">Attendance Management System</div>
+    <div class="proj-desc">Digital attendance tracking system with user records, reporting, and structured data management.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Database</span>
+      <span class="proj-tag">Admin Panel</span>
+      <span class="proj-tag">CRUD</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">♟️👑</div>
+    <div class="proj-name">Top Chess</div>
+    <div class="proj-desc">Chess-based brand.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Game Logic</span>
+      <span class="proj-tag">Chess</span>
+      <span class="proj-tag">Strategy</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">💳📈</div>
+    <div class="proj-name">Paramount Credit Pathway</div>
+    <div class="proj-desc">Financial credit workflow system concept for structured credit tracking and user financial progression.</div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Finance</span>
+      <span class="proj-tag">Workflow</span>
+      <span class="proj-tag">System Design</span>
+    </div>
+  </div>
+
+  <div class="project-card reveal">
+    <div class="proj-emoji">📦⚙️</div>
+    <div class="proj-name">DESS</div>
+    <div class="proj-desc">Utility-based management system focused on modular task handling and structured data organization for HR's and Owners </div>
+    <div class="proj-tags">
+      <span class="proj-tag">Flutter</span>
+      <span class="proj-tag">Modular</span>
+      <span class="proj-tag">System</span>
+      <span class="proj-tag">Backend Logic</span>
+    </div>
+  </div>
+
+</div>
+
+</section>
+
+<!-- ========== EDUCATION ========== -->
+<section id="education">
+  <div class="reveal">
+    <div class="section-tag">Academic</div>
+    <h2 class="section-title">Education & <span style="background:linear-gradient(90deg,var(--amber),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Certifications</span></h2>
+  </div>
+
+  <div class="edu-grid">
+    <div class="edu-card reveal">
+      <div class="edu-icon">🎓</div>
+      <div class="edu-degree">Bachelor of Science in Computer Science</div>
+      <div class="edu-inst">University of Pir Mehr Ali Shah Arid Agriculture</div>
+      <div class="edu-meta">
+        <span>📅 Oct 2018 – Oct 2023</span>
+        <span>📍 Rawalpindi, PK</span>
+      </div>
+    </div>
+
+    <div class="edu-card reveal">
+      <div class="edu-icon">📚</div>
+      <div class="edu-degree">Intermediate (ICS)</div>
+      <div class="edu-inst">Punjab Group of Colleges</div>
+      <div class="edu-meta">
+        <span>📅 Jan 2017 – Jan 2018</span>
+        <span>📍 Islamabad, PK</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:2.5rem;" class="reveal">
+    <h3 style="font-family:var(--font-h);font-size:1.3rem;font-weight:700;margin-bottom:1.25rem;">Certifications</h3>
+    <div class="certs-grid">
+      <div class="cert-card">
+        <div class="cert-name">Loveable AI</div>
+        <div class="cert-org">Udemy</div>
+        <div class="cert-date">July 2025</div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-name">Agile Project Management</div>
+        <div class="cert-org">Hp-Life</div>
+        <div class="cert-date">June 2025</div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-name">Effective Leadership</div>
+        <div class="cert-org">Hp-Life</div>
+        <div class="cert-date">August 2025</div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-name">Project Charters (Google Docs)</div>
+        <div class="cert-org">Coursera</div>
+        <div class="cert-date">August 2024</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CONTACT ========== -->
+<section id="contact">
+  <div class="reveal">
+    <div class="section-tag">Let's Connect</div>
+    <h2 class="section-title">Get In <span style="background:linear-gradient(90deg,var(--pink),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Touch</span></h2>
+    <p style="color:var(--muted);max-width:480px;line-height:1.7;margin-bottom:0;">Open to new Flutter opportunities, collaborations, and freelance projects. Let's build something great together.</p>
+  </div>
+
+  <div class="contact-wrap">
+    <div class="contact-cards reveal from-left">
+      <a href="mailto:mesulemanhassan899@gmail.com" class="contact-card">
+        <div class="contact-icon email">📧</div>
+        <div>
+          <div class="contact-label">Email</div>
+          <div class="contact-value">mesulemanhassan899@gmail.com</div>
+        </div>
+      </a>
+      <a href="tel:+923369360702" class="contact-card">
+        <div class="contact-icon phone">📱</div>
+        <div>
+          <div class="contact-label">Phone</div>
+          <div class="contact-value">0336 9360702</div>
+        </div>
+      </a>
+      <div class="contact-card">
+        <div class="contact-icon loc">📍</div>
+        <div>
+          <div class="contact-label">Location</div>
+          <div class="contact-value">Islamabad, Pakistan</div>
+        </div>
+      </div>
+      <a href="https://www.linkedin.com/in/suleman-hassan-0b42781a6" target="_blank" class="contact-card">
+        <div class="contact-icon avail">💼</div>
+        <div>
+          <div class="contact-label">LinkedIn</div>
+          <div class="contact-value">suleman-hassan-0b42781a6</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="contact-avatar-wrap reveal from-right">
+      <div class="ripple-ring"></div>
+      <div class="ripple-ring"></div>
+      <div class="ripple-ring"></div>
+      <div class="contact-big-avatar">SH</div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>Crafted with ✦ by <span>Suleman Hassan</span> — Flutter Developer, Islamabad PK &nbsp;·&nbsp; © 2026</p>
+</footer>
+
+<!-- ============================================================
+   JAVASCRIPT
+============================================================ -->
+<script>
+/* ---------- LOADER ---------- */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('hidden');
+  }, 2200);
+});
+
+/* ---------- CURSOR ---------- */
+const dot  = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+(function moveCursor() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  dot.style.left  = mx + 'px';
+  dot.style.top   = my + 'px';
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(moveCursor);
+})();
+
+document.querySelectorAll('a,button,.btn-primary,.btn-secondary,.tech-chip,.project-card,.exp-card,.contact-card').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    ring.style.transform = 'translate(-50%,-50%) scale(1.6)';
+    ring.style.borderColor = 'rgba(236,72,153,0.6)';
+    dot.style.transform = 'translate(-50%,-50%) scale(0.5)';
+  });
+  el.addEventListener('mouseleave', () => {
+    ring.style.transform = 'translate(-50%,-50%) scale(1)';
+    ring.style.borderColor = 'rgba(6,182,212,0.5)';
+    dot.style.transform = 'translate(-50%,-50%) scale(1)';
+  });
+});
+
+/* ---------- PARTICLE CANVAS ---------- */
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const COLORS = ['#4f46e5','#ec4899','#06b6d4','#f59e0b'];
+const NUM = 80;
+const particles = [];
+
+for (let i = 0; i < NUM; i++) {
+  particles.push({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    vx: (Math.random() - 0.5) * 0.5,
+    vy: (Math.random() - 0.5) * 0.5,
+    r: Math.random() * 2 + 1,
+    c: COLORS[Math.floor(Math.random() * COLORS.length)],
+    a: Math.random() * 0.6 + 0.3,
+  });
+}
+
+function drawParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0 || p.x > canvas.width)  p.vx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = p.c;
+    ctx.globalAlpha = p.a;
+    ctx.fill();
+  });
+
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 120) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = particles[i].c;
+        ctx.globalAlpha = (1 - dist / 120) * 0.15;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
+    }
+  }
+
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+/* ---------- SCROLL REVEAL ---------- */
+const revealEls = document.querySelectorAll('.reveal');
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach((e, idx) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), idx * 80);
+    }
+  });
+}, { threshold: 0.1 });
+revealEls.forEach(el => revealObs.observe(el));
+
+/* ---------- SKILL BARS ---------- */
+const skillBars = document.querySelectorAll('.skill-bar-fill');
+const barObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const bar = e.target;
+      const pct = bar.getAttribute('data-pct');
+      bar.style.width = pct + '%';
+      setTimeout(() => bar.classList.add('animated'), 100);
+      barObs.unobserve(bar);
+    }
+  });
+}, { threshold: 0.3 });
+skillBars.forEach(b => barObs.observe(b));
+
+/* ---------- MOBILE NAV ---------- */
+function toggleNav() {
+  document.getElementById('navLinks').classList.toggle('open');
+}
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('navLinks').classList.remove('open');
+  });
+});
+</script>
+</body>
+</html>
