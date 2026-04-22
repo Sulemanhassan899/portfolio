@@ -372,19 +372,19 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
 .hero-3d-card {
   width: 220px;
   background:
-    radial-gradient(120% 120% at 0% 0%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 38%),
-    linear-gradient(145deg, rgba(79,70,229,0.26), rgba(236,72,153,0.14) 50%, rgba(6,182,212,0.16) 100%);
-  border: 1px solid rgba(255,255,255,0.2);
+    radial-gradient(130% 130% at 10% 8%, rgba(139,92,246,0.3) 0%, rgba(12,10,28,0.98) 38%),
+    linear-gradient(150deg, #151133 0%, #1a1035 45%, #111d35 100%);
+  border: 1px solid rgba(110,120,255,0.35);
   border-radius: 24px;
   padding: 1.45rem 1.3rem 1.35rem;
   text-align: center;
-  backdrop-filter: blur(20px);
   animation: float3d 6s ease-in-out infinite;
   position: relative;
   z-index: 2;
   transform-style: preserve-3d;
   will-change: transform;
   transition: transform 0.25s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  overflow: hidden;
   box-shadow: 0 22px 65px rgba(79,70,229,0.22), 0 0 40px rgba(6,182,212,0.12), inset 0 1px 0 rgba(255,255,255,0.2);
 }
 .hero-card-spotlight {
@@ -424,6 +424,25 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
   border-color: rgba(6,182,212,0.4);
   box-shadow: 0 34px 80px rgba(79,70,229,0.25), 0 0 48px rgba(236,72,153,0.22);
 }
+.hero-card-wrap.intro-pending .card-badge,
+.hero-card-wrap.intro-pending .card-avatar,
+.hero-card-wrap.intro-pending .card-name,
+.hero-card-wrap.intro-pending .card-role,
+.hero-card-wrap.intro-pending .stat-item {
+  opacity: 0;
+  transform: translateY(12px) scale(0.96);
+}
+.hero-card-wrap.assemble-in .hero-3d-card {
+  animation: cardAssemble 0.8s cubic-bezier(.2,.8,.2,1) forwards, float3d 6s 0.8s ease-in-out infinite;
+}
+.hero-card-wrap.assemble-in .card-badge { animation: cardElementIn 0.38s 0.1s ease forwards; }
+.hero-card-wrap.assemble-in .card-avatar { animation: cardElementIn 0.42s 0.2s ease forwards, avatarBreath 3.2s 1.1s ease-in-out infinite; }
+.hero-card-wrap.assemble-in .card-name { animation: cardElementIn 0.38s 0.3s ease forwards; }
+.hero-card-wrap.assemble-in .card-role { animation: cardElementIn 0.38s 0.38s ease forwards; }
+.hero-card-wrap.assemble-in .stat-item:nth-child(1) { animation: cardElementIn 0.38s 0.46s ease forwards; }
+.hero-card-wrap.assemble-in .stat-item:nth-child(2) { animation: cardElementIn 0.38s 0.52s ease forwards; }
+.hero-card-wrap.assemble-in .stat-item:nth-child(3) { animation: cardElementIn 0.38s 0.58s ease forwards; }
+.hero-card-wrap.assemble-in .stat-item:nth-child(4) { animation: cardElementIn 0.38s 0.64s ease forwards; }
 .hero-card-wrap:hover .hero-card-spotlight {
   opacity: 1;
 }
@@ -444,8 +463,8 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #b7f9ff;
-  background: rgba(6,182,212,0.16);
-  border: 1px solid rgba(6,182,212,0.35);
+  background: rgba(6,182,212,0.1);
+  border: 1px solid rgba(6,182,212,0.5);
   border-radius: 999px;
   padding: 0.28rem 0.6rem;
   margin-bottom: 0.8rem;
@@ -500,8 +519,8 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
 }
 .stat-item {
   text-align: center;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(8,12,34,0.82);
+  border: 1px solid rgba(120,130,255,0.24);
   border-radius: 12px;
   padding: 0.45rem 0.25rem;
   transition: transform 0.2s ease, border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
@@ -509,8 +528,8 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
 }
 .stat-item:hover {
   transform: translateY(-3px);
-  border-color: rgba(6,182,212,0.38);
-  background: rgba(6,182,212,0.08);
+  border-color: rgba(6,182,212,0.5);
+  background: rgba(12,20,52,0.95);
   box-shadow: 0 10px 18px rgba(6,182,212,0.18);
 }
 .stat-num {
@@ -561,6 +580,28 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
 @keyframes avatarBreath {
   0%,100% { transform: translateY(0) scale(1); box-shadow: 0 0 30px rgba(79,70,229,0.5); }
   50% { transform: translateY(-3px) scale(1.03); box-shadow: 0 0 40px rgba(236,72,153,0.45); }
+}
+@keyframes cardAssemble {
+  0% { opacity: 0; transform: scale(0.85) rotateX(20deg) rotateY(-16deg) translateY(18px); filter: blur(4px) brightness(1.2); }
+  100% { opacity: 1; transform: scale(1) rotateX(0) rotateY(0) translateY(0); filter: blur(0) brightness(1); }
+}
+@keyframes cardElementIn {
+  0% { opacity: 0; transform: translateY(10px) scale(0.96); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes clickRipple {
+  0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0.65; }
+  100% { transform: translate(-50%, -50%) scale(1.65); opacity: 0; }
+}
+.hero-click-ripple {
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(6,182,212,0.45) 0%, rgba(236,72,153,0.25) 42%, transparent 72%);
+  pointer-events: none;
+  z-index: 3;
+  animation: clickRipple 0.7s ease-out forwards;
 }
 @keyframes orbFloat1 {
   0%,100% { transform: translateY(0) translateX(0); opacity: 0.8; }
@@ -1058,7 +1099,7 @@ I bridge the gap between unrivaled design and clean architecture. Specializing i
     </div>
   </div>
         <div class="hero-right reveal from-right">
-    <div class="hero-card-wrap">
+    <div class="hero-card-wrap intro-pending">
       <div class="hero-glow"></div>
       <div class="spinning-ring"></div>
       <div class="spinning-ring-inner"></div>
@@ -2140,6 +2181,13 @@ const heroCardRole = document.querySelector('.card-role');
 const heroStatItems = document.querySelectorAll('.hero-3d-card .stat-item');
 
 if (heroCardWrap && heroCard) {
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      heroCardWrap.classList.remove('intro-pending');
+      heroCardWrap.classList.add('assemble-in');
+    }, 2350);
+  });
+
   heroCardWrap.addEventListener('mousemove', (e) => {
     const rect = heroCardWrap.getBoundingClientRect();
     const px = (e.clientX - rect.left) / rect.width;
@@ -2170,6 +2218,16 @@ if (heroCardWrap && heroCard) {
     if (heroCardName) heroCardName.style.transform = '';
     if (heroCardRole) heroCardRole.style.transform = '';
     heroStatItems.forEach((item) => { item.style.transform = ''; });
+  });
+
+  heroCard.addEventListener('click', (e) => {
+    const rect = heroCard.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'hero-click-ripple';
+    ripple.style.left = `${e.clientX - rect.left}px`;
+    ripple.style.top = `${e.clientY - rect.top}px`;
+    heroCard.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 720);
   });
 }
 
