@@ -329,6 +329,17 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
   display: flex; align-items: center; justify-content: center;
   width: 320px; height: 380px;
 }
+.hero-card-wrap::before {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(236,72,153,0.2) 0%, rgba(79,70,229,0.08) 45%, transparent 70%);
+  filter: blur(16px);
+  animation: haloPulse 5s ease-in-out infinite;
+  z-index: 0;
+}
 .hero-glow {
   position: absolute;
   width: 200px; height: 200px;
@@ -358,21 +369,74 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
 }
 .hero-3d-card {
   width: 220px;
-  background: linear-gradient(135deg, rgba(79,70,229,0.2), rgba(236,72,153,0.1));
-  border: 1px solid rgba(255,255,255,0.12);
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 38%),
+    linear-gradient(145deg, rgba(79,70,229,0.26), rgba(236,72,153,0.14) 50%, rgba(6,182,212,0.16) 100%);
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 24px;
-  padding: 2rem;
+  padding: 1.45rem 1.3rem 1.35rem;
   text-align: center;
   backdrop-filter: blur(20px);
   animation: float3d 6s ease-in-out infinite;
   position: relative;
   z-index: 2;
-  box-shadow: 0 20px 60px rgba(79,70,229,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.25s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  box-shadow: 0 22px 65px rgba(79,70,229,0.22), 0 0 40px rgba(6,182,212,0.12), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.hero-3d-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  background: linear-gradient(125deg, transparent 25%, rgba(255,255,255,0.28) 45%, transparent 60%);
+  transform: translateX(-130%);
+  transition: transform 0.65s ease;
+  pointer-events: none;
+}
+.hero-3d-card::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: 23px;
+  border: 1px solid rgba(255,255,255,0.12);
+  pointer-events: none;
+}
+.hero-3d-card:hover {
+  border-color: rgba(6,182,212,0.4);
+  box-shadow: 0 34px 80px rgba(79,70,229,0.25), 0 0 48px rgba(236,72,153,0.22);
+}
+.hero-3d-card:hover::before {
+  transform: translateX(130%);
 }
 @keyframes float3d {
   0%,100% { transform: translateY(0) rotateY(-5deg) rotateX(3deg); }
   33%      { transform: translateY(-15px) rotateY(5deg) rotateX(-3deg); }
   66%      { transform: translateY(-8px) rotateY(0deg) rotateX(5deg); }
+}
+.card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b7f9ff;
+  background: rgba(6,182,212,0.16);
+  border: 1px solid rgba(6,182,212,0.35);
+  border-radius: 999px;
+  padding: 0.28rem 0.6rem;
+  margin-bottom: 0.8rem;
+}
+.card-badge .live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 0 0 rgba(6,182,212,0.45);
+  animation: pulse-dot 2s ease-in-out infinite;
 }
 .card-avatar {
   width: 80px; height: 80px;
@@ -402,7 +466,19 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
   display: grid; grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
 }
-.stat-item { text-align: center; }
+.stat-item {
+  text-align: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 0.45rem 0.25rem;
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+.stat-item:hover {
+  transform: translateY(-3px);
+  border-color: rgba(6,182,212,0.38);
+  background: rgba(6,182,212,0.08);
+}
 .stat-num {
   font-family: var(--font-h);
   font-size: 1.4rem;
@@ -413,6 +489,53 @@ section { padding: clamp(5rem, 10vw, 8rem) clamp(1.5rem, 8vw, 6rem); }
   background-clip: text;
 }
 .stat-label { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+.card-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(1px);
+  z-index: 1;
+}
+.card-orb.o1 {
+  width: 11px;
+  height: 11px;
+  top: 78px;
+  right: 46px;
+  background: rgba(6,182,212,0.9);
+  animation: orbFloat1 5.5s ease-in-out infinite;
+}
+.card-orb.o2 {
+  width: 8px;
+  height: 8px;
+  top: 180px;
+  left: 40px;
+  background: rgba(236,72,153,0.8);
+  animation: orbFloat2 6s ease-in-out infinite;
+}
+.card-orb.o3 {
+  width: 6px;
+  height: 6px;
+  bottom: 80px;
+  right: 42px;
+  background: rgba(245,158,11,0.85);
+  animation: orbFloat3 4.5s ease-in-out infinite;
+}
+@keyframes haloPulse {
+  0%, 100% { transform: scale(0.95); opacity: 0.65; }
+  50% { transform: scale(1.08); opacity: 0.95; }
+}
+@keyframes orbFloat1 {
+  0%,100% { transform: translateY(0) translateX(0); opacity: 0.8; }
+  50% { transform: translateY(-12px) translateX(6px); opacity: 1; }
+}
+@keyframes orbFloat2 {
+  0%,100% { transform: translateY(0) translateX(0); opacity: 0.75; }
+  50% { transform: translateY(-8px) translateX(-4px); opacity: 1; }
+}
+@keyframes orbFloat3 {
+  0%,100% { transform: translateY(0) scale(1); opacity: 0.8; }
+  50% { transform: translateY(-9px) scale(1.15); opacity: 1; }
+}
 
 /* ============================================================
    MARQUEE
@@ -890,36 +1013,33 @@ footer span {
     <h1 class="hero-name">Suleman<br>Hassan</h1>
     <p class="hero-subtitle">Flutter Developer & UI Architect</p>
     <p class="hero-desc">
-      I bridge the gap between **bold design** and **clean architecture**. Specializing in Flutter, I’ve delivered 30+ high-performance apps with a focus on maintainable code and robust backend integrations with Supabase & SQL.
-    </p>
+I bridge the gap between unrivaled design and clean architecture. Specializing in Flutter, I’ve engineered 30+ high-performance applications—prioritizing maintainable code, fluid stateful interfaces, and robust backend ecosystems.    </p>
     <div class="hero-ctas">
       <a href="#contact" class="btn-primary">✦ Hire Me</a>
       <a href="#projects" class="btn-secondary">See My Work →</a>
     </div>
   </div>
-</section>
-   
-
-  <div class="hero-right reveal from-right">
+        <div class="hero-right reveal from-right">
     <div class="hero-card-wrap">
       <div class="hero-glow"></div>
       <div class="spinning-ring"></div>
       <div class="spinning-ring-inner"></div>
       <div class="hero-3d-card">
+        <div class="card-badge"><span class="live-dot"></span>Available for Projects</div>
         <div class="card-avatar">SH</div>
         <div class="card-name">Suleman Hassan</div>
         <div class="card-role">Flutter Developer</div>
         <div class="card-stats">
           <div class="stat-item">
-            <div class="stat-num">3.5+</div>
+            <div class="stat-num" data-count="3.5" data-suffix="+">0</div>
             <div class="stat-label">Years Exp</div>
           </div>
           <div class="stat-item">
-            <div class="stat-num">30+</div>
+            <div class="stat-num" data-count="30" data-suffix="+">0</div>
             <div class="stat-label">Projects</div>
           </div>
           <div class="stat-item">
-            <div class="stat-num">4</div>
+            <div class="stat-num" data-count="4">0</div>
             <div class="stat-label">Certs</div>
           </div>
           <div class="stat-item">
@@ -928,9 +1048,14 @@ footer span {
           </div>
         </div>
       </div>
+      <span class="card-orb o1"></span>
+      <span class="card-orb o2"></span>
+      <span class="card-orb o3"></span>
     </div>
   </div>
 </section>
+   
+
 
 <!-- ========== MARQUEE ========== -->
 <div class="marquee-section">
@@ -1965,6 +2090,51 @@ const barObs = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.3 });
 skillBars.forEach(b => barObs.observe(b));
+
+/* ---------- HERO CARD INTERACTIONS ---------- */
+const heroCardWrap = document.querySelector('.hero-card-wrap');
+const heroCard = document.querySelector('.hero-3d-card');
+
+if (heroCardWrap && heroCard) {
+  heroCardWrap.addEventListener('mousemove', (e) => {
+    const rect = heroCardWrap.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width;
+    const py = (e.clientY - rect.top) / rect.height;
+    const rotateY = (px - 0.5) * 18;
+    const rotateX = (0.5 - py) * 16;
+    heroCard.style.transform = `translateY(-6px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  });
+
+  heroCardWrap.addEventListener('mouseleave', () => {
+    heroCard.style.transform = '';
+  });
+}
+
+const statNums = document.querySelectorAll('.stat-num[data-count]');
+const statObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+    const el = entry.target;
+    const target = Number(el.getAttribute('data-count'));
+    const suffix = el.getAttribute('data-suffix') || '';
+    const decimals = Number.isInteger(target) ? 0 : 1;
+    const duration = 1300;
+    const startTime = performance.now();
+
+    const tick = (now) => {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const value = target * eased;
+      el.textContent = `${value.toFixed(decimals)}${suffix}`;
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
+    observer.unobserve(el);
+  });
+}, { threshold: 0.35 });
+
+statNums.forEach((el) => statObserver.observe(el));
 
 /* ---------- MOBILE NAV ---------- */
 function toggleNav() {
